@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<stdlib.h>
 #include"../include/transport.h"
 
 Transport * new_transport(int id,float max_weight,float profit){
