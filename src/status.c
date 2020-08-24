@@ -56,9 +56,12 @@ Status * newSib(Status * lsib,Config * c){
 }
  
 float check(Status * status,Config * c){
-
+    if(status->stage == -1){
+        return -2;
+    }
     float profits_per_transport[c->nTransports];
     float weights_per_transport[c->nTransports];
+    int notCompleted = 0;
     for (int i = 0; i < c->nTransports; i++)
     {
         profits_per_transport[i] = 0;
@@ -66,8 +69,13 @@ float check(Status * status,Config * c){
     }
     for (int i = 0; i < c->nPackages; i++)
     {
-        profits_per_transport[status->status[i]]+= c->packages[i].weight*c->transports[status->status[i]].profit + c->packages[i].profit;
-        weights_per_transport[status->status[i]]+=c->packages[i].weight;
+        if(status->status[i]!=-2 && status->status[i]!=-1){
+            profits_per_transport[status->status[i]]+= c->packages[i].weight*c->transports[status->status[i]].profit + c->packages[i].profit;
+            weights_per_transport[status->status[i]]+=c->packages[i].weight;
+        }
+        else if(status->status[i]==-2){
+            notCompleted = 1;
+        }
     }
     float totalProfit = 0;
     for (int i = 0; i < c->nTransports; i++)
@@ -77,35 +85,23 @@ float check(Status * status,Config * c){
             return -1;
         }
     }
+    if(notCompleted){
+        return -2;
+    }
     return totalProfit;
 }
 
-int isCompleted(Status * st, Config * c){
-    for(int i = 0; i < c->nPackages ; i++){
-        if(st->status[i]!= c->nTransports-1){
-            return 0;
+
+
+void printStatus(Status * st,Config *c,float profit){
+    printf("Embarque: ");
+    for (int i = 0; i < c->nPackages; i++)
+        {
+            printf("%d ", st->status[i]);
         }
-    }
-    return 1;
+    printf("Beneficio: %f NIVEL: %d\n",profit,st->stage);
 }
 
-// Status * newStatus(Status * st, Config *c){
-//     float profit = check(st,c);
-//     if(profit ==-1){
-//         if(st->modified<c->nPackages){
-//             return newSib(st,c);
-//         }
-//         else{
-//             Status * aux = st;
-//             while(aux->modified == c->nPackages){
-//                 aux = aux->parent;
-//             }
-
-//         }
-//     }
-//     return newChild(st,c);
-    
-// }
 
 Status * getFirstChild(Status * st){
     Status *aux = st;

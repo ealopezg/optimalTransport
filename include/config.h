@@ -14,6 +14,6 @@ typedef struct Config
 } Config;
 
 Status * config(Transport * transports, Package * packages,int nTransports,int nPackages);
-Config * openFile(char *filename);
-
+Config * openFile(const char *filename);
+void writeFile(Config * c,Status * st,const char* filename);
 #endif
