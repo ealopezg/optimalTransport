@@ -7,63 +7,54 @@
 
 
 
-
+/**
+ * @brief Backtracking function, it takes
+ * a config object and returns the optimal
+ * combination (A Status Object).
+ * 
+ * @param c Config object
+ * @return Status* Optimal Combination
+ */
 Status * backtracking(Config * c){
-    c->tree = newTree(c);
+    c->tree = newTree(c); // Generates a new tree
+    
     int completed = 0;
-    Status *aux = c->tree;
-    Status *aux1;
-    Status *best;
-    float bestProfit = 0;
-    float actualProfit = -2;
-    int started=0;
-    char input[10];
-    float p;
-
-    int createSib = 0;
-    int createChild = 0;
+    Status *actual = c->tree; // Pointer to the tree of the config
+    Status *best; // Stores the best status
+    float bestProfit = 0; // Profit of the best status
+    float actualProfit = -2; // Float to the store the actual status    
+    int started=0; // FLAG TO CHECK IF THE ALGORTHIM HAS COMPLETED
+    int createSib = 0; // Flag to check if the current status can create a right sibling
+    int createChild = 0; // Flag to check if the current status can create a child
     while (completed==0)
     {
-        if(aux->stage == -1 && started==1){
+        if(actual->stage == -1 && started==1){
             completed = 1;
         }
         else{
-            createChild = aux->stage!=c->nPackages-1;
-            createSib = aux->status[aux->stage]!=c->nTransports-1;
-            actualProfit = check(aux, c);
-            //printStatus(aux,c,actualProfit);
-            //printf("CC: %d CS: %d PROFIT: %f\n",createChild,createSib,actualProfit);
-            if (actualProfit >= bestProfit && actualProfit>=0)
+            createChild = actual->stage!=c->nPackages-1;
+            createSib = actual->status[actual->stage]!=c->nTransports-1;
+
+            actualProfit = check(actual, c);
+            #ifdef DEBUG
+            printCurrent(actual,c,actualProfit);
+            #endif
+            if (actualProfit >= bestProfit && actualProfit>=0) //If the current status has best profit than the best status
             {
-                best = aux;
-                bestProfit = actualProfit;
+                best = actual; //Stores the status
+                bestProfit = actualProfit; // Stores the profit
             }
-            if(actualProfit==-1){
+            
+            if(actualProfit!=-2 || (actualProfit==-2 && !createChild)){ //If the profit is not -2: The status is invalid and go to the parent
                 while(!createSib){
-                    aux = getFirstChild(aux)->parent;
-                    createSib = aux->status[aux->stage]!=c->nTransports-1;
+                    actual = getFirstSib(actual)->parent; //Sets the actual status as the parent of the current node
+                    createSib = actual->status[actual->stage]!=c->nTransports-1; //Check if the parent can create siblings
                 }
-                aux = newSib(aux,c);
-            }
-            else if(createChild){
-                aux = newChild(aux, c); //HIJO
-                //printf("Se creó un hijo\n");
+                actual = newSib(actual,c); // Create a new sibling for the status
             }
             else{
-                if(createSib){
-                    aux = newSib(aux, c);
-                    //printf("Se creo un hermano\n");
-                }
-                else{
-                    while(!createSib){
-                        aux = getFirstChild(aux)->parent;
-                        createSib = aux->status[aux->stage]!=c->nTransports-1;
-                    }
-                    aux = newSib(aux,c);
-                }
+                actual = newChild(actual, c); // Create a new child for the status
             }
-            
-            
             started = 1;
         }
     }

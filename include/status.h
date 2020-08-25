@@ -1,6 +1,7 @@
 #ifndef STATUS_H
 #define STATUS_H
 typedef struct Config Config;
+
 typedef struct Status
 {
     int * status;
@@ -15,9 +16,10 @@ Status *newTree(Config *c);
 Status *newChild(Status *parent, Config *c);
 Status * newSib(Status * lsib,Config * c);
 float check(Status * status,Config * c);
-Status *getFirstChild(Status *st);
-int isCompleted(Status * st, Config * c);
-void printStatus(Status * st,Config *c,float profit);
+Status *getFirstSib(Status *st);
 
+#ifdef DEBUG
+void printCurrent(Status * st,Config *c,float profit);
+#endif
 
 #endif

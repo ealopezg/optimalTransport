@@ -6,27 +6,31 @@
 #include"../include/transport.h"
 #include"../include/config.h"
 
-
+/**
+ * @brief Opens the input file and
+ * creates a Config object
+ * 
+ * @param filename i.e entrada1.in
+ * @return Config* 
+ */
 Config * openFile(const char * filename){
-    char buffer[1000];
+    
     FILE * f;
-
     f = fopen (filename, "r");
     if(f == NULL){
+        fclose(f);
         return NULL;
     }
-    
-    Config *c = malloc(sizeof(Config));
-    c->maxProfit = 0;
+    // If the file is not null
+    char buffer[1000]; // Buffer to store the entire file
+    Config *c = malloc(sizeof(Config)); // Create a new config object
 
     char ch;
     int i = 0;
-    int j = 0;
-    char ant;
-    while ((ch = fgetc(f)) != EOF)
+    while ((ch = fgetc(f)) != EOF) // Reads the file until EOF
     {   
-        if(ch!='|'){
-            if(ch == '\n'){
+        if(ch!='|'){    // Ignores the |
+            if(ch == '\n'){  // Replaces the newline with an space
                 buffer[i] = ' ';
             }
             else{
@@ -35,34 +39,47 @@ Config * openFile(const char * filename){
             i++;
         }
         else{
-            ch = fgetc(f);
+            ch = fgetc(f); // Ignores the char next to |
         }
-        }
-    int n = 0;
+    }
+    fclose(f); // Closes the file
+    
     buffer[i] = '\0';
-    char *aux = &buffer[0];
-    sscanf(aux, "%d %d %n", &c->nTransports,&c->nPackages,&n);
+    int n = 0;
+    char *aux = &buffer[0]; // Pointer to the start to buffer
+
+    sscanf(aux, "%d %d %n", &c->nTransports,&c->nPackages,&n); //Saves the nTransports and nPackages, the &n stores the bytes left in the pointer
     aux = aux + n;
-    c->packages = malloc(c->nPackages*sizeof(Package));
-    c->transports = malloc(c->nTransports * sizeof(Transport));
-    fclose(f);
+
+    c->packages = malloc(c->nPackages*sizeof(Package)); //Creates the array of Packages
+    c->transports = malloc(c->nTransports * sizeof(Transport)); //Creates the array of Transports
+    
     for (int i = 0; i < c->nTransports; i++)
     {
-        sscanf(aux, "%f %f %n", &c->transports[i].max_weight, &c->transports[i].profit,&n);
-        aux = aux + n;
-        c->transports[i].id = i;
+        sscanf(aux, "%f %f %n", &c->transports[i].max_weight, &c->transports[i].profit,&n); //Store the max weight and profit for each transport
+        aux = aux + n; //Moves the pointer
+
+        c->transports[i].id = i; // Store the id
     }
     for (int i = 0; i < c->nPackages;i++){
-        sscanf(aux, "%f %f %n", &c->packages[i].weight, &c->packages[i].profit,&n);
-        aux = aux + n;
-        c->packages[i].id = i;
+        sscanf(aux, "%f %f %n", &c->packages[i].weight, &c->packages[i].profit,&n); //Store the weight and profit for each package
+        aux = aux + n; //Moves the pointer
+
+        c->packages[i].id = i; // Store the id
     }
     return c;
 }
 
+/**
+ * @brief Write a file with solution of the problem.
+ * 
+ * @param c Config Object
+ * @param st Optimal Status
+ * @param filename i.e salida.out
+ */
 void writeFile(Config * c,Status * st,const char*filename){
+    //First creates a string with the solution
     char*buffer=malloc(sizeof(char)*1000);
-    int n = 0;
     int a = 0;
     float totalweight = 0;
     float totalprofit = 0;
@@ -85,10 +102,11 @@ void writeFile(Config * c,Status * st,const char*filename){
     }
     a = snprintf(buffer+a,1000-a,"Peso total: %.1f\nBeneficio total: %.1f\n",totalweight,totalprofit)+a;
 
+    // Save the file
     FILE *fp;
-
     fp = fopen(filename, "w+");
     fputs(buffer,fp);
     fclose(fp);
+    free(buffer);
 
 }
