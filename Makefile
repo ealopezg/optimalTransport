@@ -1,5 +1,5 @@
 
-CC = GCC
+CC = gcc
 CFLAGS = -Wall
 TARGET = optimal
 
